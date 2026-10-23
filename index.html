@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CAA English Practice</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: a study-planner page. Header with the 5-step route every unit follows, then a filterable grid of unit cards grouped by status. */
+:root{
+  --bg:#f3f5fa; --surface:#ffffff; --ink:#14213d; --muted:#56607a; --line:#d9deea;
+  --accent:#1f4fd1; --accent-soft:#e3eafc; --gold:#f2b705; --gold-ink:#5c4300;
+  --new:#0f7a5a; --new-soft:#dcf3ea; --soon:#8a5a00; --soon-soft:#fbefd2;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e1424; --surface:#161e33; --ink:#e8ecf6; --muted:#9aa5c0; --line:#2a3552;
+  --accent:#8eabff; --accent-soft:#1f2c52; --gold:#f2c23a; --gold-ink:#f2c23a;
+  --new:#5fd3a9; --new-soft:#123a2e; --soon:#f0c062; --soon-soft:#3a2d10; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e1424; --surface:#161e33; --ink:#e8ecf6; --muted:#9aa5c0; --line:#2a3552;
+  --accent:#8eabff; --accent-soft:#1f2c52; --gold:#f2c23a; --gold-ink:#f2c23a;
+  --new:#5fd3a9; --new-soft:#123a2e; --soon:#f0c062; --soon-soft:#3a2d10; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.55}
+.wrap{max-width:1080px;margin:0 auto;padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.eyebrow{font-size:.78rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,5vw,3.1rem);line-height:1.05;margin:.35em 0 .3em;text-wrap:balance}
+h1 span{background:linear-gradient(transparent 62%,var(--gold) 62%,var(--gold) 90%,transparent 90%);padding:0 .08em}
+.lead{max-width:62ch;color:var(--muted);font-size:1.08rem;margin:0}
+h2{font-family:var(--display);font-weight:700;font-size:1.45rem;margin:0;text-wrap:balance}
+/* Route */
+.route{margin-top:32px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.route ol{list-style:none;margin:14px 0 0;padding:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;counter-reset:s}
+.route li{counter-increment:s;position:relative;padding:12px;border-radius:10px;background:var(--bg);min-width:0}
+.route li::before{content:counter(s);font-family:var(--display);font-weight:800;font-size:1.3rem;color:var(--accent);display:block;line-height:1}
+.route b{display:block;margin-top:6px}
+.route small{color:var(--muted);font-size:.86rem;display:block}
+.skills{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.skills i{font-style:normal;font-size:.74rem;padding:1px 7px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:700}
+.evidence{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.evidence div{border:1px dashed var(--line);border-radius:10px;padding:10px 12px;font-size:.9rem;color:var(--muted)}
+.evidence strong{color:var(--ink)}
+/* Before you start */
+.start{margin-top:20px;background:var(--surface);border:1px solid var(--line);border-left:5px solid var(--gold);border-radius:14px;padding:20px}
+.es-h{font-weight:500;color:var(--muted);font-size:1rem}
+.start-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-top:12px}
+.start-grid b{display:block;margin-bottom:4px}
+.start-grid p{margin:0 0 6px;font-size:.92rem}
+.start .es{color:var(--muted);font-style:italic;font-size:.88rem}
+@media (max-width:760px){.start-grid{grid-template-columns:1fr}}
+/* Controls */
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:40px 0 18px}
+.controls label{font-weight:700;font-size:.9rem}
+#q{flex:1 1 220px;min-width:0;font:inherit;padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font:inherit;font-size:.88rem;font-weight:700;padding:7px 13px;border-radius:99px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+/* Groups & cards */
+.group{margin-top:28px}
+.group-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.group-head .count{color:var(--muted);font-size:.9rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.card .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lvl{font-family:var(--display);font-weight:800;font-size:.82rem;padding:3px 9px;border-radius:6px;background:var(--gold);color:#2b2000;letter-spacing:.02em}
+.status{font-size:.74rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:99px}
+.st-ready{background:var(--accent-soft);color:var(--accent)}
+.st-progress{background:var(--new-soft);color:var(--new)}
+.st-planned{background:var(--soon-soft);color:var(--soon)}
+.card h3{font-family:var(--display);font-weight:700;font-size:1.2rem;line-height:1.2;margin:4px 0 0;text-wrap:balance}
+.focus{color:var(--muted);font-size:.93rem;margin:0}
+.num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:.8rem;font-weight:700}
+.card .go{margin-top:auto;padding-top:8px}
+.card a.btn{display:inline-block;font-weight:700;text-decoration:none;color:var(--surface);background:var(--accent);padding:8px 14px;border-radius:9px}
+.card a.btn:hover{filter:brightness(1.08)}
+.card .pending{font-size:.88rem;color:var(--muted);font-style:italic}
+.empty{color:var(--muted);padding:20px;border:1px dashed var(--line);border-radius:12px;text-align:center}
+footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--line);color:var(--muted);font-size:.88rem}
+@media (max-width:760px){.route ol{grid-template-columns:repeat(2,minmax(0,1fr))}.route li:last-child{grid-column:1/-1}.evidence{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.card{transition:transform .15s ease,border-color .15s}.card:hover{transform:translateY(-2px);border-color:var(--accent)}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">CAA Virtual · BUAP · English A1–C2</div>
+    <h1>Practice English <span>at your own pace</span></h1>
+    <p class="lead">Choose a unit, follow the five steps, and check what you can do at the end. Every unit takes about 50–60 minutes and you can come back any time.</p>
+  </header>
+
+  <section class="route" aria-labelledby="route-h">
+    <h2 id="route-h">How every unit works</h2>
+    <ol>
+      <li><b>Presentation</b><small>Meet the topic in a real situation.</small></li>
+      <li><b>Objectives</b><small>See what you will be able to do.</small></li>
+      <li><b>Explanation</b><small>Vocabulary, grammar and examples.</small></li>
+      <li><b>Practice</b><small>Four skills:</small><span class="skills"><i>Listening</i><i>Reading</i><i>Writing</i><i>Speaking</i></span></li>
+      <li><b>Self-assessment</b><small>Rate six "I can…" statements from 1 to 5.</small></li>
+    </ol>
+    <div class="evidence">
+      <div><strong>Writing evidence:</strong> write and submit your text directly in the unit.</div>
+      <div><strong>Speaking evidence:</strong> practice with the computer, then record your task and upload it to your course platform.</div>
+    </div>
+  </section>
+
+  <section class="start" aria-labelledby="start-h">
+    <h2 id="start-h">Before you start <span class="es-h">· Antes de empezar</span></h2>
+    <div class="start-grid">
+      <div><b>🌐 Use Google Chrome or Microsoft Edge</b><p>The audio and the speaking practice work best in these browsers, on a computer or an Android phone.</p><p class="es">Abre el sitio en Chrome o Edge para escuchar bien los audios y practicar con el micrófono. Otros navegadores (Safari, Firefox) pueden no funcionar bien.</p></div>
+      <div><b>🎤 Allow the microphone</b><p>When the browser asks, click <i>Allow</i>. If you clicked <i>Block</i> by mistake, click the 🔒 next to the web address and allow the microphone.</p><p class="es">Cuando el navegador lo pida, da clic en <i>Permitir</i>. Si lo bloqueaste, da clic en el candado 🔒 junto a la dirección y permite el micrófono.</p></div>
+      <div><b>🎧 Use headphones in a quiet place</b><p>You will hear the conversations more clearly and the computer will understand you better.</p><p class="es">Usa audífonos y busca un lugar tranquilo.</p></div>
+    </div>
+  </section>
+
+  <div class="controls">
+    <label for="q">Find a unit</label>
+    <input id="q" type="search" placeholder="Try “past”, “food” or “directions”" autocomplete="off">
+    <div class="chips" role="group" aria-label="Filter by level" id="levels"></div>
+  </div>
+
+  <main id="list"></main>
+
+  <footer>CAA Virtual · BUAP · Your progress is saved on this device only.</footer>
+</div>
+
+<script>
+/* ===== Units on the home page =====
+   To add a unit: copy the _template folder, rename it (e.g. "my-new-unit"),
+   edit its data.js, then add one line here with url: "my-new-unit/".
+   isNew: true shows a "New" label. */
+const UNITS = [
+  {title:"Hi, My Name Is…",                focus:"Verb to be: name, age, city and job",                              level:"A1", url:"hi-my-name-is/"},
+  {title:"Describing Myself and Others",   focus:"Appearance and personality with be and have",                      level:"A1", url:"describing-myself-and-others/"},
+  {title:"Can You Swim?",                  focus:"Can / can't for abilities",                                         level:"A1", url:"can-you-swim/"},
+  {title:"My Daily Routine",               focus:"Present simple for habits and routines",                            level:"A1", url:"my-daily-routine/"},
+  {title:"What Do You Like Doing?",        focus:"Love, like, hate + -ing for hobbies",                               level:"A1", url:"what-do-you-like-doing/"},
+  {title:"When Is Your Birthday?",         focus:"Dates, ordinal numbers and in / on / at",                           level:"A1", url:"when-is-your-birthday/"},
+  {title:"What Are You Doing?",            focus:"Present progressive for actions happening now",                     level:"A1", url:"what-are-you-doing/"},
+  {title:"What Is in Your Room?",          focus:"There is / there are and prepositions of place",                    level:"A1", url:"what-is-in-your-room/"},
+  {title:"My Plans for the Weekend",       focus:"Present progressive for arrangements and will for decisions",       level:"A2", url:"my-plans-for-the-weekend/"},
+  {title:"Are You OK?",                    focus:"Giving advice: should, maybe you could, you'd better",              level:"A2", url:"are-you-ok/"},
+  {title:"Talking About Personal Objects", focus:"Possessive adjectives and describing objects",                      level:"A2", url:"talking-about-personal-objects/"},
+  {title:"Shopping for Clothes",           focus:"Too / enough and shop language",                                    level:"A2", url:"shopping-for-clothes/"},
+  {title:"Let's Get Cooking!",             focus:"Cooking verbs, imperatives and sequencers",                         level:"A2", url:"lets-get-cooking/"},
+  {title:"My Last Vacation",               focus:"Past simple: regular and irregular verbs, was / were",              level:"A2", url:"my-last-vacation/"},
+  {title:"What Were You Doing?",           focus:"Past continuous vs. past simple with when and while",               level:"A2", url:"what-were-you-doing/"},
+  {title:"Have You Ever…?",                focus:"Present perfect for life experiences",                              level:"A2", url:"have-you-ever/"},
+  {title:"Whose Phone Is This?",           focus:"Personal possessions: this/that, 's, whose, mine/yours",            level:"B1", url:"whose-phone-is-this/"},
+  {title:"How Do I Get There?",            focus:"Imperatives for giving and following directions",                   level:"B1", url:"how-do-i-get-there/"},
+  {title:"How Was Your Weekend?",          focus:"Past activities and adjectives to describe them",                   level:"B1", url:"how-was-your-weekend/"},
+  {title:"What Would You Like to Eat?",    focus:"Countable and uncountable nouns, some/any, how much/many",          level:"B1", url:"what-would-you-like-to-eat/"},
+  {title:"Where Are You Going?",           focus:"Describing places with comparatives and superlatives",              level:"B1", url:"where-are-you-going/"},
+  {title:"Where Do You Want to Meet?",     focus:"Future with will and going to",                                     level:"B1", url:"where-do-you-want-to-meet/"},
+  {title:"What Would You Do?",             focus:"Second conditional for imaginary situations and advice",            level:"B1", url:"what-would-you-do/"},
+  {title:"Made in Mexico",                 focus:"Passive voice: processes, products and inventions",                 level:"B1", url:"made-in-mexico/"},
+  {title:"It Must Have Been…",             focus:"Modals of deduction: present and past speculation",                 level:"B2", url:"it-must-have-been/", isNew:true},
+  {title:"If Only…",                       focus:"Third conditional, wishes and regrets",                             level:"B2", url:"if-only/", isNew:true},
+  {title:"She Said That…",                 focus:"Reported speech and reporting verbs",                               level:"B2", url:"she-said-that/", isNew:true},
+  {title:"Have You Been Waiting Long?",    focus:"Present perfect continuous vs. simple, for and since",              level:"B2", url:"have-you-been-waiting-long/", isNew:true},
+  {title:"The Person Who…",                focus:"Defining and non-defining relative clauses",                        level:"B2", url:"the-person-who/", isNew:true},
+  {title:"Getting Things Done",            focus:"Causative: have / get something done",                              level:"B2", url:"getting-things-done/", isNew:true},
+  {title:"By This Time Next Year",         focus:"Future continuous and future perfect",                              level:"B2", url:"by-this-time-next-year/", isNew:true},
+  {title:"Applying for a Job",             focus:"Gerunds and infinitives; interviews and cover letters",             level:"B2", url:"applying-for-a-job/", isNew:true},
+  {title:"Never Have I Seen…",             focus:"Negative inversion for emphasis",                                   level:"C1", url:"never-have-i-seen/", isNew:true},
+  {title:"What I Need Is…",                focus:"Cleft sentences for emphasis and correction",                       level:"C1", url:"what-i-need-is/", isNew:true},
+  {title:"It's About Time",                focus:"The unreal past: it's time, I'd rather, as if, wish + would",       level:"C1", url:"its-about-time/", isNew:true},
+  {title:"If I Had Studied…",              focus:"Mixed conditionals, unless, provided that, inverted conditionals",  level:"C1", url:"if-i-had-studied/", isNew:true},
+  {title:"It Is Said That…",               focus:"Passive reporting structures in the news",                          level:"C1", url:"it-is-said-that/", isNew:true},
+  {title:"Having Finished…",               focus:"Participle clauses for concise, formal writing",                    level:"C1", url:"having-finished/", isNew:true},
+  {title:"Making a Case",                  focus:"Discourse markers, conceding and hedging in debate",                level:"C1", url:"making-a-case/", isNew:true},
+  {title:"Break the Ice",                  focus:"Workplace idioms and phrasal verbs",                                level:"C1", url:"break-the-ice/", isNew:true},
+  {title:"Mind Your Register",             focus:"Formal, neutral and informal register; politeness strategies",      level:"C2", url:"mind-your-register/", isNew:true},
+  {title:"Shades of Meaning",              focus:"Connotation, intensity and collocation",                            level:"C2", url:"shades-of-meaning/", isNew:true},
+  {title:"Less Is More",                   focus:"Ellipsis and substitution for natural English",                     level:"C2", url:"less-is-more/", isNew:true},
+  {title:"The Academic Voice",             focus:"Nominalization, hedging and stance in academic English",            level:"C2", url:"the-academic-voice/", isNew:true},
+  {title:"Reading Between the Lines",      focus:"Implied meaning, irony and understatement",                         level:"C2", url:"reading-between-the-lines/", isNew:true},
+  {title:"The Art of Storytelling",        focus:"Narrative tenses, fronting and vivid language",                     level:"C2", url:"the-art-of-storytelling/", isNew:true},
+  {title:"Finding Common Ground",          focus:"Diplomatic language for negotiation and mediation",                 level:"C2", url:"finding-common-ground/", isNew:true},
+  {title:"It Is Essential That…",          focus:"The subjunctive and formal rules and statements",                   level:"C2", url:"it-is-essential-that/", isNew:true}
+];
+
+const GROUPS = [
+  {key:"A1", name:"Level A1", note:"First steps"},
+  {key:"A2", name:"Level A2", note:"Everyday situations"},
+  {key:"B1", name:"Level B1", note:"Getting independent"},
+  {key:"B2", name:"Level B2", note:"Confident communication"},
+  {key:"C1", name:"Level C1", note:"Advanced and precise"},
+  {key:"C2", name:"Level C2", note:"Mastery"}
+];
+const LEVELS = ["All","A1","A2","B1","B2","C1","C2"];
+let level = "All";
+
+const chipsEl = document.getElementById("levels");
+LEVELS.forEach(l=>{
+  const b=document.createElement("button");
+  b.className="chip"; b.type="button"; b.textContent=l; b.id="lvl-"+l;
+  b.setAttribute("aria-pressed", l===level ? "true":"false");
+  b.addEventListener("click",()=>{level=l;[...chipsEl.children].forEach(c=>c.setAttribute("aria-pressed",c.textContent===l?"true":"false"));render();});
+  chipsEl.appendChild(b);
+});
+document.getElementById("q").addEventListener("input",render);
+
+function esc(s){return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function done(u){ try { const s=JSON.parse(localStorage.getItem("caa:"+u.url.replace(/\/$/,""))||"{}"); return s.self && Object.keys(s.self).length>=6; } catch(e){ return false; } }
+
+function render(){
+  const q=document.getElementById("q").value.trim().toLowerCase();
+  const list=document.getElementById("list"); list.innerHTML="";
+  let shown=0;
+  GROUPS.forEach(g=>{
+    const items=UNITS.map((u,i)=>({...u,n:i+1})).filter(u=>u.level===g.key
+      && (level==="All"||u.level.includes(level))
+      && (!q || (u.title+" "+u.focus).toLowerCase().includes(q)));
+    if(!items.length) return;
+    shown+=items.length;
+    const sec=document.createElement("section"); sec.className="group";
+    sec.innerHTML=`<div class="group-head"><h2>${g.name}</h2><span class="count">${g.note} · ${items.length} unit${items.length>1?"s":""}</span></div>`;
+    const grid=document.createElement("div"); grid.className="grid";
+    items.forEach(u=>{
+      const badge = done(u) ? `<span class="status st-progress">Completed</span>` : (u.isNew ? `<span class="status st-planned">New</span>` : "");
+      const go = u.url ? `<a class="btn" href="${esc(u.url)}">Start unit →</a>` : `<span class="pending">Not available yet</span>`;
+      grid.insertAdjacentHTML("beforeend",
+        `<article class="card"><div class="top"><span class="lvl">${u.level}</span>${badge}</div>
+         <h3>${esc(u.title)}</h3><p class="focus">${esc(u.focus)}</p><div class="go">${go}</div></article>`);
+    });
+    sec.appendChild(grid); list.appendChild(sec);
+  });
+  if(!shown) list.innerHTML=`<p class="empty">No units match. Try another word or choose “All”.</p>`;
+}
+render();
+</script>
+</body>
+</html>
